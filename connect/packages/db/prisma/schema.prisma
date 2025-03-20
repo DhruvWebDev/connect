@@ -1,0 +1,67 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Editor {
+  id             String        @id @default(uuid())
+  username       String        @unique
+  email          String        @unique
+  hashedPassword String
+  videos         Video[]       @relation("EditorVideos")
+  createdAt      DateTime      @default(now())
+  EditedVideo    EditedVideo[]
+}
+
+model Youtuber {
+  id               String   @id @default(uuid())
+  username         String   @unique
+  email            String   @unique
+  hashedPassword   String
+  hashedAccessCode String
+  videos           Video[]  @relation("YoutuberVideos")
+  createdAt        DateTime @default(now())
+}
+
+model Video {
+  videoId      String        @id @default(uuid())
+  fileUrl      String
+  youtuber     Youtuber      @relation("YoutuberVideos", fields: [youtuberId], references: [id])
+  editor       Editor?       @relation("EditorVideos", fields: [editorId], references: [id])
+  youtuberId   String
+  editorId     String?
+  createdAt    DateTime      @default(now())
+  status       VideoStatus   @default(NOT_STARTED)
+  editedVideos EditedVideo[] // Multiple edited versions
+
+  @@index([videoId])
+  @@index([editorId, status])
+}
+
+model EditedVideo {
+  id         String   @id @default(uuid())
+  video      Video    @relation(fields: [videoId], references: [videoId])
+  videoId    String
+  fileUrl    String // URL of the edited version
+  uploadedBy Editor   @relation(fields: [editorId], references: [id])
+  editorId   String
+  createdAt  DateTime @default(now())
+  status     Status   @default(PENDING_REVIEW)
+}
+
+enum VideoStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum Status {
+  PENDING_REVIEW
+  APPROVED
+  REJECTED
+  PUBLISHED
+}
