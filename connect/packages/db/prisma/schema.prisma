@@ -15,6 +15,8 @@ model Editor {
   videos         Video[]       @relation("EditorVideos")
   createdAt      DateTime      @default(now())
   EditedVideo    EditedVideo[]
+  associatedYt   String?       // Nullable foreign key
+  youtuberDashboard Youtuber?  @relation("youtuberEditor", fields:[associatedYt], references:[id])
 }
 
 model Youtuber {
@@ -25,6 +27,7 @@ model Youtuber {
   hashedAccessCode String
   videos           Video[]  @relation("YoutuberVideos")
   createdAt        DateTime @default(now())
+  Editor           Editor[] @relation("youtuberEditor")
 }
 
 model Video {

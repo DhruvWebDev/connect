@@ -2,6 +2,7 @@ import express, { Router } from "express";
 import { db, VideoStatus, type Video } from "@repo/db";
 import { hashPassword, MatchPassword, uploadVideoToS3 } from "../../lib/utils";
 import jwt from "jsonwebtoken";
+import { isEditor } from "../../middleware/v1/editor";
 
 const editorRouter = Router();
 editorRouter.post("/register", async (req, res) => {
@@ -47,10 +48,13 @@ editorRouter.post("/login", async (req, res) => {
     }
 
     // Generate JWT
-    const token = jwt.sign({ userId: user.id }, process.env.SECRET_KEY, {
-      expiresIn: "1h",
+    const token = jwt.sign({ userId: user.id, role:"editor" }, process.env.SECRET_KEY, {
+      expiresIn: "24h",
     });
 
+    //appending to the headers
+    res.setHeader("Authorization", `Bearer ${token}`);
+    
     res.status(200).json({ token });
 
   } catch (error) {
@@ -58,10 +62,7 @@ editorRouter.post("/login", async (req, res) => {
   }
 });
 
-import { VideoStatus } from "@prisma/client"; // Import the Prisma enum
-import { connect } from "http2";
-
-editorRouter.get("/assigned-video", async (req, res) => {
+editorRouter.get("/assigned-video" ,async (req, res) => {
   const editorId = req.query.editor as string;
   // Log the editorId to verify it's being received correctly
   console.log("Editor ID from query:", editorId);
@@ -85,61 +86,47 @@ editorRouter.get("/assigned-video", async (req, res) => {
 });
 
 
-editorRouter.post("/update-video-status", async (req, res) => {
-  const { status } = req.body;  // ✅ Correct
-  const result = await db.video.update({
-    where:{
-      videoId:"10b43fd1-b9a9-4e76-b907-250b4f250fbb"
-    },
-    data:{
-      status
-    }
-  })
-
-  console.log(result);
-
-  res.status(200).json(result);
-})
-
-editorRouter.post("/assign-editor", (req, res) => {
-
-})
-
-
-editorRouter.post("/upload-edited-video", async (req, res) => {
-  const mockUrl = "https://wwwoifn.com";
-  const videoId = "10b43fd1-b9a9-4e76-b907-250b4f250fbb";
-  const editorId = req.body.editorId; // Get editorId from request body
-  
-  // Validate required fields
-  if (!editorId) {
-    return res.status(400).json({ error: "Editor ID is required" });
-  }
+editorRouter.post("/update-video-status", isEditor, async (req, res) => {
+  const { status } = req.body;
 
   try {
-    const result = await db.editedVideo.create({
+    const result = await db.video.update({
+      where: {
+        videoId: "10b43fd1-b9a9-4e76-b907-250b4f250fbb"
+      },
       data: {
-        fileUrl: mockUrl,
-        videoId,
-        editorId, // Add the required editorId field
+        status
       }
     });
-    
-    console.log("Edited video created:", result);
-    res.status(201).json(result);
+
+    console.log(result);
+    res.status(200).json(result);
+
   } catch (error) {
-    console.error("Database error:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+    res.status(500).json({ error: error.message });
   }
 });
 
-// Placeholder routes
-editorRouter.get("/youtuber-list", (req, res) => {
-  res.json({ message: "Fetching list of YouTubers" });
+
+
+
+
+editorRouter.post("/update-video-status", isEditor, async (req, res) => {
+  const { status } = req.body;
+
+  try {
+      const result = await db.video.update({
+          where: { videoId: "10b43fd1-b9a9-4e76-b907-250b4f250fbb" },
+          data: { status }
+      });
+
+      console.log(result);
+      res.status(200).json(result);
+
+  } catch (error) {
+      res.status(500).json({ error: error.message });
+  }
 });
 
-editorRouter.get("/youtuber-dashboard", (req, res) => {
-  res.json({ message: "Fetching YouTuber dashboard data" });
-});
 
 export default editorRouter;

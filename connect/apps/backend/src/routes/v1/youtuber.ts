@@ -36,25 +36,34 @@ youtuberRouter.post("/upload", async (req, res) => {
   }
 });
 
-youtuberRouter.post("/assign", async (req, res) => {
-  const result = await db.video.update({
-    where: {
-      videoId: "10b43fd1-b9a9-4e76-b907-250b4f250fbb"
-    },
-    data: {
-      editorId: "cc857875-fbd2-4070-8ebc-690d451cf7d0"
-    }
-  })
-  console.log(result)
-  res.status(200).json(result);
+youtuberRouter.post("/assign-video", async (req, res) => {
+  try {
+    const { videoId, editorId } = req.body;
+    const result = await db.video.update({
+      where: {
+        videoId
+      },
+      data: {
+        editorId
+      }
+    })
+    console.log(result)
+    res.status(200).json(result);
+
+  } catch (error) {
+    res.status(404).json({'error':error})
+  }
 })
 
 youtuberRouter.get("/get-edited-video-of-raw-video", async (req, res) => {
   try {
+    const { videoId } = req.body;
+
     const result = await db.video.findUnique({
-      where: { videoId: "10b43fd1-b9a9-4e76-b907-250b4f250fbb" },
+      where: { videoId },
       include: { editedVideos: true }, // Include the edited video relation
     });
+
     res.status(200).json(result);
   } catch (error) {
     res.status(400).json({ 'error': error });
@@ -63,17 +72,53 @@ youtuberRouter.get("/get-edited-video-of-raw-video", async (req, res) => {
 
 youtuberRouter.post("/update-status-of-video", async (req, res) => {
   try {
+    const videoId = req.body.videoId;
+    const status = req.body.status;
     const result = await db.editedVideo.update({
-      where:{
-        id:"4b82df70-3e59-44d6-a90f-b55110b0fd29"
+      where: {
+        id: videoId
       },
-      data:{
-        status:"REJECTED"
+      data: {
+        status
       }
     })
     console.log(result);
   } catch (error) {
-    res.status(404).json({'error':error})
+    res.status(404).json({ 'error': error })
   }
 })
+
+youtuberRouter.post("/add-editor", async (req, res) => {
+  try {
+    const { editorId, youtuberId } = req.body;
+    const result = await db.editor.update({
+      where: {
+        id: editorId
+      }, data: {
+        associatedYt: youtuberId
+      }
+    })
+
+    res.status(200).json(result);
+
+  } catch (error) {
+    res.status(404).json({ 'error': error })
+  }
+})
+
+youtuberRouter.get("/editor", async (req, res) => {
+  try {
+    const { editorId } = req.body;
+    const result = await db.youtuber.findMany({
+      where: {
+        id: editorId
+      }, include: { Editor: true }
+    });
+    res.status(200).json(result);
+
+  } catch (error) {
+    res.status(404).json({ 'error': error })
+  }
+})
+
 export default youtuberRouter;
