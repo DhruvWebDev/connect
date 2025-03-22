@@ -2,7 +2,7 @@ const fs = require("fs");
 const { google } = require("googleapis");
 
 const oauth2Client = new google.auth.OAuth2();
-oauth2Client.setCredentials({ access_token: " ya29.a0AeXRPp7ja3OVtXt3vlg7N9glkKqL3UzboAxoqzZwCX0VGFhpf_oNnB7Hw7Bv5kqjkd4iSYufXUOZl-SvMPEQb-aFjJhqahn28as2wEnos8kMzmTbzaw5wxpjhmifrEM3nuEmCwH2HOBoOehgHUiuWPO9ci2wVcb4E9h9HzBkaCgYKAdwSARASFQHGX2Mi2weG0rDpNDwKPsgTOmtoFQ0175" });
+oauth2Client.setCredentials({ access_token: "" });
 
 const youtube = google.youtube({
   version: "v3",
