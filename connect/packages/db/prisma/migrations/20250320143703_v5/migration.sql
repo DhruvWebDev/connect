@@ -1,0 +1,5 @@
+-- CreateEnum
+CREATE TYPE "Status" AS ENUM ('PENDING_REVIEW', 'APPROVED', 'REJECTED', 'PUBLISHED');
+
+-- AlterTable
+ALTER TABLE "EditedVideo" ADD COLUMN     "status" "Status" NOT NULL DEFAULT 'PENDING_REVIEW';

@@ -1,0 +1,24 @@
+{
+  "name": "@repo/db",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "module": "index.ts",
+  "type": "module",
+    "scripts": {
+      "db:generate": "prisma generate",
+      "db:migrate": "prisma migrate dev --skip-generate",
+      "db:deploy": "prisma migrate deploy"
+    },
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest",
+    "prisma": "^6.5.0"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.5.0"
+  }
+}
