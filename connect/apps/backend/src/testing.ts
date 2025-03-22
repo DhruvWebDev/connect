@@ -41,9 +41,16 @@ const app = express();
 const port = 5000;
 
 const SCOPES = ["https://www.googleapis.com/auth/youtube.upload"];
+<<<<<<< HEAD
 const REDIRECT_URI =""
 const GOOGLE_CLIENT_ID = "";
 const GOOGLE_CLIENT_SECRET = "";
+=======
+const GOOGLE_CLIENT_ID=""
+const GOOGLE_CLIENT_SECRET=""
+const REDIRECT_URI = "";
+
+>>>>>>> 05c4d5da5077c0de1c30235cf14fdc14b68e0ca8
 
 const oauth2Client = new google.auth.OAuth2(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, REDIRECT_URI);
 
