@@ -5,6 +5,22 @@ import jwt from "jsonwebtoken";
 import { isEditor } from "../../middleware/v1/editor";
 
 const editorRouter = Router();
+editorRouter.post("/upload-video", async (req, res) => {
+  try {
+    const { url, editorId,rawVideoId } = req.body
+    const result = await db.editedVideo.create({
+      data: {
+        fileUrl: url, // Use the actual URL from the mockUrls array
+        editorId, // Connect the video to the Youtuber by their ID
+        videoId: rawVideoId
+      }
+    }); 
+    res.status(201).json({ success: "Video uploaded successfully", url: mockUrls });
+  } catch (error) {
+    res.status(400).json({ error: "Bad Request" });
+  }
+});
+
 editorRouter.post("/register", async (req, res) => {
   const { username, email, password } = req.body;
   try {
@@ -87,12 +103,12 @@ editorRouter.get("/assigned-video" ,async (req, res) => {
 
 
 editorRouter.post("/update-video-status", isEditor, async (req, res) => {
-  const { status } = req.body;
+  const { videoId, status } = req.body;
 
   try {
     const result = await db.video.update({
       where: {
-        videoId: "10b43fd1-b9a9-4e76-b907-250b4f250fbb"
+        videoId
       },
       data: {
         status
@@ -103,30 +119,13 @@ editorRouter.post("/update-video-status", isEditor, async (req, res) => {
     res.status(200).json(result);
 
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: error });
   }
 });
 
 
 
 
-
-editorRouter.post("/update-video-status", isEditor, async (req, res) => {
-  const { status } = req.body;
-
-  try {
-      const result = await db.video.update({
-          where: { videoId: "10b43fd1-b9a9-4e76-b907-250b4f250fbb" },
-          data: { status }
-      });
-
-      console.log(result);
-      res.status(200).json(result);
-
-  } catch (error) {
-      res.status(500).json({ error: error.message });
-  }
-});
 
 
 export default editorRouter;

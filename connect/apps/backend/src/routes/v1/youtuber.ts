@@ -9,27 +9,15 @@ dotenv.config();
 const youtuberRouter = Router();
 
 // ✅ FIXED: Ensure `uploadVideoToS3` is awaited
-youtuberRouter.post("/upload", async (req, res) => {
-  // const formData = req.body.formData;
+youtuberRouter.post("/upload-video", async (req, res) => {
   try {
-    // const upload = await uploadVideoToS3(formData);
-    // const youtuberId = req.body.ytId;
-    //Add the url to the db
-    const mockUrls = [
-      "https://example.com/video1.mp4",
-      "https://example.com/video2.mp4",
-      "https://example.com/video3.mp4"
-    ];
-    const youtuberId = "xyz";
-    for (let url in mockUrls) {
-      // Create a new video entry in the database with the specified file URL and associate it with the Youtuber using their ID
-      const result = await db.video.create({
-        data: {
-          fileUrl: mockUrls[url], // Use the actual URL from the mockUrls array
-          youtuber: { connect: { id: youtuberId } }, // Connect the video to the Youtuber by their ID
-        }
-      });
-    }
+    const { url, youtuberId } = req.body
+    const result = await db.video.create({
+      data: {
+        fileUrl: url, // Use the actual URL from the mockUrls array
+        youtuberId, // Connect the video to the Youtuber by their ID
+      }
+    });
     res.status(201).json({ success: "Video uploaded successfully", url: mockUrls });
   } catch (error) {
     res.status(400).json({ error: "Bad Request" });
@@ -51,13 +39,13 @@ youtuberRouter.post("/assign-video", async (req, res) => {
     res.status(200).json(result);
 
   } catch (error) {
-    res.status(404).json({'error':error})
+    res.status(404).json({ 'error': error })
   }
 })
 
 youtuberRouter.get("/get-edited-video-of-raw-video", async (req, res) => {
   try {
-    const { videoId } = req.body;
+    const { rawVideoId } = req.body;
 
     const result = await db.video.findUnique({
       where: { videoId },
@@ -70,13 +58,12 @@ youtuberRouter.get("/get-edited-video-of-raw-video", async (req, res) => {
   }
 })
 
-youtuberRouter.post("/update-status-of-video", async (req, res) => {
+youtuberRouter.patch("/update-status-of-video", async (req, res) => {
   try {
-    const videoId = req.body.videoId;
-    const status = req.body.status;
+    const {editedVideoId, status} = req.body;
     const result = await db.editedVideo.update({
       where: {
-        id: videoId
+        id: editedVideoId
       },
       data: {
         status
@@ -88,7 +75,7 @@ youtuberRouter.post("/update-status-of-video", async (req, res) => {
   }
 })
 
-youtuberRouter.post("/add-editor", async (req, res) => {
+youtuberRouter.post("/onboarding-editor", async (req, res) => {
   try {
     const { editorId, youtuberId } = req.body;
     const result = await db.editor.update({
@@ -106,12 +93,12 @@ youtuberRouter.post("/add-editor", async (req, res) => {
   }
 })
 
-youtuberRouter.get("/editor", async (req, res) => {
+youtuberRouter.get("/get-editor", async (req, res) => {
   try {
-    const { editorId } = req.body;
+    const { youtuberId } = req.body;
     const result = await db.youtuber.findMany({
       where: {
-        id: editorId
+        id: youtuberId
       }, include: { Editor: true }
     });
     res.status(200).json(result);

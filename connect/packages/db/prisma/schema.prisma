@@ -40,7 +40,7 @@ model Video {
   createdAt    DateTime      @default(now())
   status       VideoStatus   @default(NOT_STARTED)
   editedVideos EditedVideo[] // Multiple edited versions
-
+  Comment      Comment[]
   @@index([videoId])
   @@index([editorId, status])
 }
@@ -54,6 +54,16 @@ model EditedVideo {
   editorId   String
   createdAt  DateTime @default(now())
   status     Status   @default(PENDING_REVIEW)
+  feedback   String?  
+}
+
+model Comment {
+  id        String 
+  content   String
+  timestamp  DateTime @default(now())
+  sender    String
+  Video   Video  @relation(fields:[associatedVideoId], references:[videoId])
+  associatedVideoId 
 }
 
 enum VideoStatus {
