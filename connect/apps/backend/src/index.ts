@@ -15,19 +15,18 @@ app.use("/youtuber", youtubeRouter);
 
 app.get('/generate-presigned-url', testMiddleware, async (req, res) => {
   const filename = req.query.filename;
-  console.log(filename);
-  const user_id = req.user?.userId;
-  console.log(user_id);
-  const role = req.user?.role;
-  console.log(role);
-  const fileRef = await helper.s3.file(filename as string);
+  try {
+    const fileRef = await helper.s3.file(filename as string);
 
-  const url = fileRef.presign({
-    expiresIn: 3600,
-    method: "PUT",
-  });
-  console.log(url);
-  res.status(200).json({ url });
+    const url = fileRef.presign({
+      expiresIn: 3600,
+      method: "PUT",
+    });
+    res.status(201).json({ url });
+  
+  } catch (error) {
+    res.status(404).json({'error':error})
+  }
 })
 
 app.listen(PORT, () => {
